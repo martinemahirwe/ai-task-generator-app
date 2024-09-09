@@ -1,20 +1,23 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
+import { gradeTask } from '~/app/actions/grading ';
+import { AnswerValue, QuestionType } from '~/app/components/QuestionForm';
+import { AnswerSchema } from '~/utils/validation/answersSchema.validation';
 import { QuestionSchema } from '~/utils/validation/schema.validation';
-import { createPathTask } from '~/app/actions/actions';
+
 
 
 export async function POST(req: NextRequest) {
   try {
-    const  {topic,selectedType} = await req.json() as {topic: string, selectedType:string[]};
+    const  {questions,userAnswers} = await req.json() as {questions:QuestionType[], userAnswers:Record<string, AnswerValue>};
     
-    const task = await createPathTask(topic,selectedType);
-    const parsedQuestions = QuestionSchema.array().parse(task);
+    const task = await gradeTask(questions,userAnswers);
+    const parsedQuestions = AnswerSchema.array().parse(task);
     if (!parsedQuestions) {
       throw new Error('Parsed questions are undefined or null');
   }
     return NextResponse.json(
-      { message: 'Here is the response from AI', data: parsedQuestions},
+      { message: 'Here is the gades from AI', data: parsedQuestions},
       { status: 201 }
     );
   } catch (error: unknown) {
