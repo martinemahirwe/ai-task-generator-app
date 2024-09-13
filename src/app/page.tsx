@@ -1,4 +1,4 @@
-import QuestionForm from "./QuestionForm";
+import QuestionForm from "./components/QuestionForm";
 
 const Home = () => {
   return (
