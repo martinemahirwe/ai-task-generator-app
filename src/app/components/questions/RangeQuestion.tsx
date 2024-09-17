@@ -1,7 +1,5 @@
 import React from "react";
-import { type z } from "zod";
-import { type QuestionSchema } from "~/utils/validation/schema.validation";
-import { Props } from "./AttachmentQuestion";
+import { type Props } from "./AttachmentQuestion";
 
 const RangeQuestion = ({ question, onValueChange }: Props) => {
   if (question.type == "RANGE") {
@@ -12,15 +10,15 @@ const RangeQuestion = ({ question, onValueChange }: Props) => {
         <input
           type="range"
           title="input range"
-          min={question.metadata.range.min}
-          max={question.metadata.range.max}
+          min={question.min}
+          max={question.max}
           step={1}
           className="w-full"
           onChange={(e) => onValueChange(e.target.value)}
         />
         <p>
-          Value: {question.metadata.range.min} (Min:{" "}
-          {question.metadata.range.min}, Max: {question.metadata.range.max})
+          Value: {question.min} (Min:{" "}
+          {question.min}, Max: {question.max})
         </p>
       </div>
     );

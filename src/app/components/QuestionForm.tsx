@@ -49,6 +49,7 @@ const QuestionForm = () => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [selectedType, setSelectedType] = useState<string[] | null>([]);
   const [loading, setLoading] = useState(false);
+  const [loader,setLoader] = useState(false);
   const [answer, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [grades, setGrades] = useState<number[]>([]);
 
@@ -61,7 +62,7 @@ const QuestionForm = () => {
       [questionId]: answer,
     }));
   };
-
+  console.log(questions,"here are questions ===")
   const generateQuestion = (question: QuestionType) => {
     switch (question.type) {
       case "MULTIPLE_CHOICE":
@@ -161,8 +162,8 @@ const QuestionForm = () => {
   };
   const onGrading = async () => {
     try {
+      setLoader(true);
       const response = await gradePathTask(questions, answer);
-
       if (response.data) {
         const newGrades = response.data.map((resp) => resp.grading);
 
@@ -173,14 +174,10 @@ const QuestionForm = () => {
     } catch (error) {
       console.error("Error creating task:", error);
     } finally {
-      setLoading(false);
+      setLoader(false);
     }
   };
-  console.log(
-    grades.reduce((acc, cur) => (acc + cur) / grades.length, 0).toFixed(2),
-    "Grades collected from response",
-  );
-
+  
   const handleTypeSelection = (typeId: string) => {
     setSelectedType((prev) => {
       const updatedTypes = prev?.includes(typeId)
@@ -267,7 +264,7 @@ const QuestionForm = () => {
           onClick={onGrading}
           className="focus:shadow-outline mt-4 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700 focus:outline-none"
         >
-          Grade Questions
+          {loader?"loading...":"Grade Questions"}
         </button>
       )}
     </div>

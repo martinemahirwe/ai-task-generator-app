@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import { type z } from "zod";
-import { type QuestionSchema } from "~/utils/validation/schema.validation";
+import React from "react";
 import { type Props } from "./AttachmentQuestion";
 
 const DropDownQuestion = ({ question, onValueChange }: Props) => {
@@ -14,13 +12,13 @@ const DropDownQuestion = ({ question, onValueChange }: Props) => {
           className="w-full rounded-lg border p-2 outline-none"
         >
           <option value="">Select an option</option>
-          {question.metadata.dropDown.datasetData.map((option, index) => (
+          {question.choices?.map((option, index) => (
             <option
               key={index}
-              value={option}
-              onChange={() => onValueChange(option)}
+              value={option.choice}
+              onChange={() => onValueChange(option.choice)}
             >
-              {option}
+              {option.choice}
             </option>
           ))}
         </select>

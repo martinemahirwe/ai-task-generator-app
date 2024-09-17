@@ -9,12 +9,12 @@ export async function POST(req: NextRequest) {
     const  {topic,selectedType} = await req.json() as {topic: string, selectedType:string[]};
     
     const task = await createPathTask(topic,selectedType);
-    const parsedQuestions = QuestionSchema.array().parse(task);
-    if (!parsedQuestions) {
-      throw new Error('Parsed questions are undefined or null');
-  }
+  //   const parsedQuestions = QuestionSchema.array().parse(task);
+  //   if (!parsedQuestions) {
+  //     throw new Error('Parsed questions are undefined or null');
+  // }
     return NextResponse.json(
-      { message: 'Here is the response from AI', data: parsedQuestions},
+      { message: 'Here is the response from AI', data: task},
       { status: 201 }
     );
   } catch (error: unknown) {

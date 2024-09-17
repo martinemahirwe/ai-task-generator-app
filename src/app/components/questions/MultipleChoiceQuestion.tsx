@@ -1,10 +1,7 @@
-import React, { useState } from "react";
-import { type z } from "zod";
-import { type QuestionSchema } from "~/utils/validation/schema.validation";
-import { Props } from "./AttachmentQuestion";
+import React from "react";
+import { type Props } from "./AttachmentQuestion";
 
 const MultipleChoiceQuestion = ({ question, onValueChange }: Props) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   if (question.type === "MULTIPLE_CHOICE" || question.type === "CHECKBOXES") {
     const handleCheckChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onValueChange([e.target.value]);

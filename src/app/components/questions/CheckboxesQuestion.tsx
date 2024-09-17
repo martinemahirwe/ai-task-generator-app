@@ -1,8 +1,6 @@
 import { useState } from "react";
 import React from "react";
-import { type z } from "zod";
-import { type QuestionSchema } from "~/utils/validation/schema.validation";
-import { Props } from "./AttachmentQuestion";
+import { type Props } from "./AttachmentQuestion";
 
 const CheckboxesQuestion = ({ question, onValueChange }: Props) => {
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
