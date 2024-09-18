@@ -1,15 +1,15 @@
 "use server";
-import { generateObject, JSONParseError, TypeValidationError } from "ai";
-import { openai } from '@ai-sdk/openai';
+import { generateObject } from "ai";
+import { anthropic } from '@ai-sdk/anthropic';
 import { config } from "dotenv";
 import { QuestionSchema } from "~/utils/validation/schema.validation";
 
 config({ path: ".env.local" });
 
-export async function createPathTask(topic: string, selectedType: string[]) {
+export async function createPathTask(topic: string, selectedType: string[],label:string) {
   try {
     const { object: task } = await generateObject({
-      model: openai('gpt-4o'),
+      model: anthropic("claude-3-5-sonnet-20240620"),
       prompt: `
         Generate diverse and relevant questions based on the topic: "${topic}". 
 
@@ -21,8 +21,12 @@ export async function createPathTask(topic: string, selectedType: string[]) {
         4. Ensure that all generated UUIDs are unique for each question.
         5. The questions should be well-structured and meaningful, accurately reflecting the nature of the topic and selected types. 
            Provide correct details for fields such as "title," "label," "description," and "expectedAnswer."
-        6. Return the output strictly as an array of JSON objects formatted according to the specified schema.
-        7. If a question type requires specific attributes (like choices for multiple-choice questions), ensure those are included.
+        6. Adjust the complexity and depth of the questions according to the difficulty level ${label}: 
+           - Easy: simpler questions, less depth
+           - Medium: moderate complexity
+           - Difficult: advanced, in-depth questions
+        7. Return the output strictly as an array of JSON objects formatted according to the specified schema.
+        8. If a question type requires specific attributes (like choices for multiple-choice questions), ensure those are included.
 
         Thank you for your assistance!`,
       system:
@@ -30,8 +34,7 @@ export async function createPathTask(topic: string, selectedType: string[]) {
       schema: QuestionSchema,
       output: "array",
     });
-
-    console.log(task);
+    
     return task;
   } catch (error) {
     console.error("Error while generating tasks:", error);

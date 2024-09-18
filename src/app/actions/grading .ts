@@ -1,6 +1,6 @@
 "use server";
 import { generateObject } from "ai";
-import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
 import { config } from "dotenv";
 import { AnswerSchema } from "~/utils/validation/answersSchema.validation";
 import { AnswerValue, QuestionType } from "~/hooks/useCreateTask";
@@ -13,7 +13,6 @@ export async function gradeTask(
   userAnswers: Record<string, AnswerValue>,
 ) {
   const expectedAnswers = (question: QuestionType) => {
-    console.log(question.id,question.type)
     switch (question.type) {
       case 'TEXT':
       case 'PARAGRAPH':
@@ -44,7 +43,7 @@ export async function gradeTask(
     const expectedAnswersList = questions.map(expectedAnswers);
     
     const { object: task } = await generateObject({
-      model: openai('gpt-4o'),
+      model: anthropic("claude-3-5-sonnet-20240620"),
       prompt: `
       You are an AI evaluator tasked with grading user answers based on expected answers. Your grading should follow these criteria:
       
@@ -69,8 +68,6 @@ export async function gradeTask(
       schema: AnswerSchema,
       output: "array",
     });
-    
-    console.log("Response from AI here:", task);
     return task;
   } catch (error: unknown) {
     console.error("Error:", error);

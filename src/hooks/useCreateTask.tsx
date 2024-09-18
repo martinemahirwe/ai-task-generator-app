@@ -17,17 +17,23 @@ import UrlQuestion from "~/app/components/questions/UrlQuestion";
 import { toast } from "react-toastify";
 
 const QUESTION_TYPES = [
-  { id: "TEXT", label: "Text", icon: "📝" },
-  { id: "PARAGRAPH", label: "Paragraph", icon: "📄" },
-  { id: "CHECKBOXES", label: "Checkboxes", icon: "☑️" },
-  { id: "MULTIPLE_CHOICE", label: "Multiple Choice", icon: "🔘" },
-  { id: "DATE", label: "Date", icon: "📅" },
-  { id: "ATTACHMENT", label: "Attachment", icon: "📎" },
-  { id: "URL", label: "URL", icon: "🔗" },
-  { id: "CODE", label: "Code", icon: "💻" },
-  { id: "LINEAR_SCALE", label: "Linear Scale", icon: "📏" },
-  { id: "RANGE", label: "Range", icon: "↔️" },
-  { id: "DROP_DOWN", label: "Drop Down", icon: "⬇️" },
+  { id: "TEXT", label: "text", icon: "📝" },
+  { id: "PARAGRAPH", label: "paragraph", icon: "📄" },
+  { id: "CHECKBOXES", label: "checkboxes", icon: "☑️" },
+  { id: "MULTIPLE_CHOICE", label: "multiple Choice", icon: "🔘" },
+  { id: "DATE", label: "date", icon: "📅" },
+  { id: "ATTACHMENT", label: "attachment", icon: "📎" },
+  { id: "URL", label: "url", icon: "🔗" },
+  { id: "CODE", label: "code", icon: "💻" },
+  { id: "LINEAR_SCALE", label: "linear scale", icon: "📏" },
+  { id: "RANGE", label: "range", icon: "↔️" },
+  { id: "DROP_DOWN", label: "drop down", icon: "⬇️" },
+];
+
+const Difficulty = [
+  { id: 'EASY', label: 'easy', color: 'bg-green-500' },
+  { id: 'MEDIUM', label: 'medium', color: 'bg-yellow-500' },
+  { id: 'DIFFICULT', label: 'difficult', color: 'bg-red-500' },
 ];
 
 type GradingRes = {
@@ -60,6 +66,7 @@ export const useCreateTask = ()=>{
       const [answer, setAnswers] = useState<Record<string, AnswerValue>>({});
       const [grades, setGrades] = useState<number[]>([]);
       const [gradingRes,setGradingRes] = useState<GradingRes>([])
+      const [label,setLabel] = useState<string>("easy");
     
       const handleValueChange = (
         questionId: string,
@@ -158,9 +165,11 @@ export const useCreateTask = ()=>{
       const onSubmit: SubmitHandler<Inputs> = async (data) => {
         try {
           setLoading(true);
-          const response = await createTask(data.topic, selectedType ?? []);
+          const response = await createTask(data.topic, selectedType ?? [],label);
           if (response.data) {
             setQuestions(response.data);
+            setGrades([]);
+            setGradingRes([])
           }
         } catch (error) {
           console.error("Error creating task:", error);
@@ -192,7 +201,10 @@ export const useCreateTask = ()=>{
           setLoader(false);
         }
       };
-      
+
+      const setDifficulty = (label: string) => {
+        setLabel(label);
+      };
       
       const handleTypeSelection = (typeId: string) => {
         setSelectedType((prev) => {
@@ -223,6 +235,9 @@ export const useCreateTask = ()=>{
         errors,
         selectedType,
         questions,
-        gradingRes
+        gradingRes,
+        Difficulty,
+        setDifficulty,
+        label
       }
 }

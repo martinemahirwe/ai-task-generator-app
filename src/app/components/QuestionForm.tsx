@@ -20,7 +20,10 @@ const QuestionForm = () => {
     selectedType,
     questions,
     onGrading,
-    gradingRes
+    gradingRes,
+    Difficulty,
+    setDifficulty,
+    label
   } = useCreateTask();
   
   return (
@@ -46,7 +49,20 @@ const QuestionForm = () => {
           />
           {errors && <span>{errors.root?.message}</span>}
         </div>
-
+        <div className="flex space-x-4 mt-7">
+      {Difficulty.map((difficulty) => (
+        <button
+          key={difficulty.id}
+          type="button"
+          onClick={() => setDifficulty(difficulty.label)}
+          className={`px-4 py-1 rounded-lg text-white font-bold transition-colors duration-300 
+          ${label === difficulty.label ? difficulty.color : 'bg-gray-300'} 
+          ${label === difficulty.label ? 'scale-105' : 'hover:scale-105'}`}
+        >
+          {difficulty.label}
+        </button>
+      ))}
+    </div>
         <div className="mt-6">
           <h3 className="mb-2 text-lg font-bold">Question Types</h3>
           <div className="grid grid-cols-5 gap-3">
@@ -69,6 +85,7 @@ const QuestionForm = () => {
         </div>
         <div className="flex justify-between">
           <button
+            key={selectedType?.length}
             type="submit"
             className="focus:shadow-outline mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
           >
@@ -87,7 +104,6 @@ const QuestionForm = () => {
     )}
   </div>
 </div>
-
         </div>
       </form>
 
@@ -99,6 +115,7 @@ const QuestionForm = () => {
 
             {gradingRes.map((grade)=>( grade.questionId === question.id &&
               <div
+              key={grade.questionId}
                 className={`mt-4 p-4 rounded-lg shadow-md ${
                   grade.grading > 2 ? "bg-green-100" : "bg-red-100"
                 }`}
@@ -133,6 +150,7 @@ const QuestionForm = () => {
 
       {questions.length >= 1 && (
         <button
+          key={gradingRes.length}
           type="button"
           onClick={onGrading}
           disabled={grades.length >= 1 || loader}

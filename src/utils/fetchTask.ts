@@ -2,15 +2,17 @@
 import axios from 'axios';
 import { type z } from 'zod';
 import { type QuestionSchema } from './validation/schema.validation';
-import { AnswerValue } from '~/app/components/QuestionForm';
 import { GradesType } from './validation/answersSchema.validation';
+import { AnswerValue } from '~/hooks/useCreateTask';
 
 const apiClient = axios.create({
-    baseURL:'/',
-    headers:{
-        'Content-Type':'application/json'
-    }
-  })
+  baseURL:'/',
+  headers:{
+      'Content-Type':'application/json'
+  }
+  
+});
+
   type QuestionType = z.infer<typeof QuestionSchema>;
 
  interface GenerateQuestionsResponse {
@@ -22,11 +24,12 @@ interface GenerateAnswerResponse {
   data: GradesType[];
 }
 
- export const createTask = async (topic: string, selectedType: string[]) :Promise<GenerateQuestionsResponse> => {
+ export const createTask = async (topic: string, selectedType: string[],label:string) :Promise<GenerateQuestionsResponse> => {
     try {
       const response = await apiClient.post('api/quiz',{
         topic,
-        selectedType
+        selectedType,
+        label
       });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return

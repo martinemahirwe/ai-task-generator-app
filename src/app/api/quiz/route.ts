@@ -3,16 +3,13 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { QuestionSchema } from '~/utils/validation/schema.validation';
 import { createPathTask } from '~/app/actions/actions';
 
-
+export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   try {
-    const  {topic,selectedType} = await req.json() as {topic: string, selectedType:string[]};
+    const  {topic,selectedType,label} = await req.json() as {topic: string, selectedType:string[],label:string};
     
-    const task = await createPathTask(topic,selectedType);
-  //   const parsedQuestions = QuestionSchema.array().parse(task);
-  //   if (!parsedQuestions) {
-  //     throw new Error('Parsed questions are undefined or null');
-  // }
+    const task = await createPathTask(topic,selectedType,label);
+    
     return NextResponse.json(
       { message: 'Here is the response from AI', data: task},
       { status: 201 }

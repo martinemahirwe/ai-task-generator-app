@@ -1,7 +1,7 @@
 import React from "react";
 import { type z } from "zod";
+import { AnswerValue } from "~/hooks/useCreateTask";
 import { type QuestionSchema } from "~/utils/validation/schema.validation";
-import { type AnswerValue } from "../QuestionForm";
 
 export interface Props {
   question: z.infer<typeof QuestionSchema>;
