@@ -1,12 +1,10 @@
 "use server";
 import { generateObject } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { openai } from '@ai-sdk/openai';
 import { config } from "dotenv";
 import { AnswerSchema } from "~/utils/validation/answersSchema.validation";
-import {
-  type AnswerValue,
-  type QuestionType,
-} from "../components/QuestionForm";
+import { AnswerValue, QuestionType } from "~/hooks/useCreateTask";
+
 
 config({ path: ".env.local" });
 
@@ -15,6 +13,7 @@ export async function gradeTask(
   userAnswers: Record<string, AnswerValue>,
 ) {
   const expectedAnswers = (question: QuestionType) => {
+    console.log(question.id,question.type)
     switch (question.type) {
       case 'TEXT':
       case 'PARAGRAPH':
@@ -24,12 +23,17 @@ export async function gradeTask(
       case 'DATE':
       case 'ATTACHMENT':
       case 'URL':
-        return question.expectedAnswer;
+        return {
+          [question.id]: question.expectedAnswer,
+        };
   
       case 'CHECKBOXES':
       case 'MULTIPLE_CHOICE':
       case 'DROP_DOWN':
-        return question.choices.filter(choice => choice.isCorrect).map(choice => choice.choice);
+        const correctChoices = question.choices?.filter(choice => choice.isCorrect).map(choice => choice.choice) || [];
+        return {
+          [question.id]: correctChoices,
+        };
   
       default:
         throw new Error(`Unknown question type`);
@@ -38,11 +42,9 @@ export async function gradeTask(
 
   try {
     const expectedAnswersList = questions.map(expectedAnswers);
-
-    console.log(expectedAnswersList,"expected answerlist");
     
     const { object: task } = await generateObject({
-      model: anthropic("claude-3-haiku-20240307"),
+      model: openai('gpt-4o'),
       prompt: `
       You are an AI evaluator tasked with grading user answers based on expected answers. Your grading should follow these criteria:
       
@@ -61,6 +63,7 @@ export async function gradeTask(
       Carefully compare each user answer against the corresponding expected answer. Assign a score between 0 and 5 based on the criteria outlined above. If possible, provide specific reasoning for each score assigned to help clarify your evaluation process.
       
       Be mindful that a score of 0 should be assigned when the user’s response does not address the question at all or is completely off-topic. Aim for clarity and accuracy in your grading.
+      questionId in answerSchema is the id of the question that is common in userAnswers and Expected answers;
       `,
       system: "You are an AI grader Evaluate the user answer based on the expected answer.Provide a score out of 5 and indicate if the answer is correct.Include an explanation in the automated response.",
       schema: AnswerSchema,

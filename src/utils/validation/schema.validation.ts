@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -7,12 +8,8 @@ export const QuestionChoiceSchema = z.object({
   isCorrect: z.boolean(),
 });
 
-export const expectedAnswerSchema = z.object({
-expectedAnswer: z.string(),
-});
-
 const BaseQuestionSchema = z.object({
-  id: z.string().uuid().default(() => uuidv4()),
+  id: z.string(),
   title: z.string(),
   label: z.string(),
   description: z.string().optional(),
@@ -23,18 +20,21 @@ const BaseQuestionSchema = z.object({
 
 const TextQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('TEXT'),
+  minWords: z.number().optional(),
+  maxWords: z.number().optional(),
   expectedAnswer: z.string(),
 });
 
 const ParagraphQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('PARAGRAPH'),
+  minWords: z.number().optional(),
+  maxWords: z.number().optional(),
   expectedAnswer: z.string(),
-  wordLimit: z.number().optional(),
 });
 
 const ChoicesQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('CHECKBOXES').or(z.literal('MULTIPLE_CHOICE')).or(z.literal('DROP_DOWN')),
-  choices: z.array(QuestionChoiceSchema).min(1, 'Choices are required'),
+  choices: z.array(QuestionChoiceSchema).min(2, 'Choices are required'),
 });
 
 const CodeQuestionSchema = BaseQuestionSchema.extend({
@@ -53,21 +53,21 @@ const LinearScaleQuestionSchema = BaseQuestionSchema.extend({
 
 const RangeQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('RANGE'),
-  min: z.string(),
-  max: z.string(),
+  min: z.number(),
+  max: z.number(),
   expectedAnswer: z.string(),
 });
 
 const DateQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('DATE'),
-  expectedAnswer: expectedAnswerSchema
+  expectedAnswer: z.string(),
 });
 
 const AttachmentQuestionSchema = BaseQuestionSchema.extend({
   type: z.literal('ATTACHMENT'),
   fileType: z.enum(['image', 'video', 'document']),
   maxFileSize: z.number().optional(),
-  expectedAnswer:  z.string().url(),
+  expectedAnswer:  z.string(),
 });
 
 const UrlQuestionSchema = BaseQuestionSchema.extend({
@@ -80,8 +80,8 @@ export const QuestionSchema = z.union([
   ParagraphQuestionSchema,
   ChoicesQuestionSchema,
   CodeQuestionSchema,
-  LinearScaleQuestionSchema,
   RangeQuestionSchema,
+  LinearScaleQuestionSchema,
   DateQuestionSchema,
   AttachmentQuestionSchema,
   UrlQuestionSchema,

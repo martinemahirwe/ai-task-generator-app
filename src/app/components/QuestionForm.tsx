@@ -1,197 +1,31 @@
 "use client";
-import { useForm, type SubmitHandler } from "react-hook-form";
-import { createTask, gradePathTask } from "../../utils/fetchTask";
-import { useState } from "react";
-import { type QuestionSchema } from "~/utils/validation/schema.validation";
-import TextQuestion from "./questions/TextQuestion";
-import ParagraphQuestion from "./questions/ParagraphQuestion";
-import CheckboxesQuestion from "./questions/CheckboxesQuestion";
-import MultipleChoiceQuestion from "./questions/MultipleChoiceQuestion";
-import DateQuestion from "./questions/DateQuestion";
-import AttachmentQuestion from "./questions/AttachmentQuestion";
-import UrlQuestion from "./questions/UrlQuestion";
-import CodeQuestion from "./questions/CodeQuestion";
-import LinearScaleQuestion from "./questions/LinearScaleQuestion";
-import RangeQuestion from "./questions/RangeQuestion";
-import DropDownQuestion from "./questions/DropDownQuestion";
-import { type z } from "zod";
-
-const QUESTION_TYPES = [
-  { id: "TEXT", label: "Text", icon: "📝" },
-  { id: "PARAGRAPH", label: "Paragraph", icon: "📄" },
-  { id: "CHECKBOXES", label: "Checkboxes", icon: "☑️" },
-  { id: "MULTIPLE_CHOICE", label: "Multiple Choice", icon: "🔘" },
-  { id: "DATE", label: "Date", icon: "📅" },
-  { id: "ATTACHMENT", label: "Attachment", icon: "📎" },
-  { id: "URL", label: "URL", icon: "🔗" },
-  { id: "CODE", label: "Code", icon: "💻" },
-  { id: "LINEAR_SCALE", label: "Linear Scale", icon: "📏" },
-  { id: "RANGE", label: "Range", icon: "↔️" },
-  { id: "DROP_DOWN", label: "Drop Down", icon: "⬇️" },
-];
-
-export type QuestionType = z.infer<typeof QuestionSchema>;
-export type AnswerValue = string | number | string[] | number[] | boolean;
-
-type Inputs = {
-  topic: string;
-  questionType: string | null;
-};
+import { useCreateTask } from "~/hooks/useCreateTask";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const QuestionForm = () => {
+
   const {
+    answer,
     register,
     handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<Inputs>();
-
-  const [questions, setQuestions] = useState<QuestionType[]>([]);
-  const [selectedType, setSelectedType] = useState<string[] | null>([]);
-  const [loading, setLoading] = useState(false);
-  const [loader,setLoader] = useState(false);
-  const [answer, setAnswers] = useState<Record<string, AnswerValue>>({});
-  const [grades, setGrades] = useState<number[]>([]);
-
-  const handleValueChange = (
-    questionId: string,
-    answer: string | string[] | number[] | number | boolean,
-  ) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionId]: answer,
-    }));
-  };
-  console.log(questions,"here are questions ===")
-  const generateQuestion = (question: QuestionType) => {
-    switch (question.type) {
-      case "MULTIPLE_CHOICE":
-        return (
-          <MultipleChoiceQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "TEXT":
-        return (
-          <TextQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "PARAGRAPH":
-        return (
-          <ParagraphQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "CHECKBOXES":
-        return (
-          <CheckboxesQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "DATE":
-        return (
-          <DateQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "ATTACHMENT":
-        return (
-          <AttachmentQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "URL":
-        return (
-          <UrlQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "CODE":
-        return (
-          <CodeQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "LINEAR_SCALE":
-        return (
-          <LinearScaleQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "RANGE":
-        return (
-          <RangeQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      case "DROP_DOWN":
-        return (
-          <DropDownQuestion
-            question={question}
-            onValueChange={(answer) => handleValueChange(question.id, answer)}
-          />
-        );
-      default:
-        return <div>No question available yet.</div>;
-    }
-  };
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      setLoading(true);
-      const response = await createTask(data.topic, selectedType ?? []);
-      if (response.data) {
-        setQuestions(response.data);
-      }
-    } catch (error) {
-      console.error("Error creating task:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const onGrading = async () => {
-    try {
-      setLoader(true);
-      const response = await gradePathTask(questions, answer);
-      if (response.data) {
-        const newGrades = response.data.map((resp) => resp.grading);
-
-        setGrades((prev) => [...prev, ...newGrades]);
-
-        console.log(grades, "Grades collected from response");
-      }
-    } catch (error) {
-      console.error("Error creating task:", error);
-    } finally {
-      setLoader(false);
-    }
-  };
+    renderQuestions,
+    onSubmit,
+    handleTypeSelection,
+    loading,
+    loader,
+    grades,
+    QUESTION_TYPES,
+    errors,
+    selectedType,
+    questions,
+    onGrading,
+    gradingRes
+  } = useCreateTask();
   
-  const handleTypeSelection = (typeId: string) => {
-    setSelectedType((prev) => {
-      const updatedTypes = prev?.includes(typeId)
-        ? prev.filter((id) => id !== typeId)
-        : [...(prev ?? []), typeId];
-
-      setValue("questionType", `${JSON.stringify(updatedTypes)}`);
-
-      return updatedTypes;
-    });
-  };
-
   return (
     <div className="quiz-form-container">
+      <ToastContainer />
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="rounded-lg bg-gray-100 p-6 shadow-md"
@@ -238,31 +72,72 @@ const QuestionForm = () => {
             type="submit"
             className="focus:shadow-outline mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
           >
-            Generate Questions
+            {loading?'Generating Questions...':'Generate Questions'}
           </button>
-          <div className="flex items-center justify-center rounded px-3 text-red-500">
-            scored{" "}
-            {grades.length > 1
-              ? `${grades.reduce((acc, cur) => (acc + cur) / grades.length, 0).toFixed(2)}${" "}outof 5`
-              : "no grades yet"}
-          </div>
+          <div className="flex items-center justify-center mt-4 p-4 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg shadow-lg text-white">
+           <span className="mr-2 text-lg font-semibold">You scored:</span>
+          <div className="flex items-center space-x-2">
+          {grades.length >= 1 ? (
+          <span className="text-2xl font-bold">
+        {grades.reduce((acc, cur) => Math.ceil((acc + cur) / grades.length), 0)}{" "}
+        <span className="text-sm font-normal">/ 5</span>
+      </span>
+    ) : (
+      <span className="italic">No grades yet</span>
+    )}
+  </div>
+</div>
+
         </div>
       </form>
 
-      {loading ? (
-        <div>generating task...</div>
-      ) : (
-        questions.map((question) => (
+     {questions.map((question) =>(
           <div key={question.id} className="questions-wrapper mt-6">
-            <div>{generateQuestion(question)}</div>
+            <form>
+              <div>{renderQuestions(question)}</div>
+            </form>
+
+            {gradingRes.map((grade)=>( grade.questionId === question.id &&
+              <div
+                className={`mt-4 p-4 rounded-lg shadow-md ${
+                  grade.grading > 2 ? "bg-green-100" : "bg-red-100"
+                }`}
+              >
+                <p className="text-gray-800 mt-2">
+                  <strong>Expected Response:</strong>
+                  <span className="block text-green-700">
+                    {grade.expectedAnswers}
+                  </span>
+                </p>
+                <p className="text-gray-800 mt-2">
+                  <strong>Your Response:</strong>
+                  <span className="block text-blue-700">
+                    {grade.userAnswers}
+                  </span>
+                </p>
+                <p
+                  className={`mt-4 font-bold ${
+                    grade.grading > 2
+                      ? "text-green-700"
+                      : "text-red-700"
+                  }`}
+                >
+                  {grade.grading > 2 ? "Correct!" : "Incorrect."} You scored{" "}
+                  {grade.grading}.
+                </p>
+              </div>
+            ))}
           </div>
-        ))
+        )
       )}
-      {questions && (
+
+      {questions.length >= 1 && (
         <button
           type="button"
           onClick={onGrading}
-          className="focus:shadow-outline mt-4 rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700 focus:outline-none"
+          disabled={grades.length >= 1 || loader}
+          className={`focus:shadow-outline mt-4 rounded px-4 py-2 font-bold text-white transition-colors
+            ${grades.length >= 1 || loader ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-700 focus:outline-none'}`}
         >
           {loader?"loading...":"Grade Questions"}
         </button>
