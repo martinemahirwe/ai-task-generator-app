@@ -1,7 +1,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { gradeTask } from '~/app/actions/grading ';
-import { AnswerValue, QuestionType } from '~/app/components/QuestionForm';
+import { AnswerValue, QuestionType } from '~/hooks/useCreateTask';
 import { AnswerSchema } from '~/utils/validation/answersSchema.validation';
 import { QuestionSchema } from '~/utils/validation/schema.validation';
 

@@ -2,8 +2,8 @@
 import axios from 'axios';
 import { type z } from 'zod';
 import { type QuestionSchema } from './validation/schema.validation';
-import { AnswerValue } from '~/app/components/QuestionForm';
 import { GradesType } from './validation/answersSchema.validation';
+import { AnswerValue } from '~/hooks/useCreateTask';
 
 const apiClient = axios.create({
     baseURL:'/',

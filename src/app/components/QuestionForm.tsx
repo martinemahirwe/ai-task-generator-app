@@ -69,6 +69,7 @@ const QuestionForm = () => {
         </div>
         <div className="flex justify-between">
           <button
+            key={selectedType?.length}
             type="submit"
             className="focus:shadow-outline mt-4 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
           >
@@ -99,6 +100,7 @@ const QuestionForm = () => {
 
             {gradingRes.map((grade)=>( grade.questionId === question.id &&
               <div
+              key={grade.questionId}
                 className={`mt-4 p-4 rounded-lg shadow-md ${
                   grade.grading > 2 ? "bg-green-100" : "bg-red-100"
                 }`}
@@ -133,6 +135,7 @@ const QuestionForm = () => {
 
       {questions.length >= 1 && (
         <button
+          key={gradingRes.length}
           type="button"
           onClick={onGrading}
           disabled={grades.length >= 1 || loader}
