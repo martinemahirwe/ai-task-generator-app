@@ -3,7 +3,7 @@ import { generateObject } from "ai";
 import { anthropic } from '@ai-sdk/anthropic';
 import { config } from "dotenv";
 import { QuestionSchema } from "~/utils/validation/schema.validation";
-import { useSaveQuestions } from "~/hooks/useSaveQuestions";
+import { saveQuestions } from "~/hooks/useSaveQuestions";
 
 config({ path: ".env.local" });
 
@@ -35,7 +35,8 @@ export async function createPathTask(topic: string, selectedType: string[],label
       schema: QuestionSchema,
       output: "array",
     });
-    await useSaveQuestions(task);
+    console.log(task,"these are questions from AI")
+    await saveQuestions(task);
     return task;
   } catch (error) {
     console.error("Error while generating tasks:", error);

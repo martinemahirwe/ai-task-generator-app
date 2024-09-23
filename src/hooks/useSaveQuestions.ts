@@ -2,14 +2,14 @@ import { saveQuestionsToDB } from "~/app/actions/saveQuestions";
 import { GeneratedQuestionType } from "~/utils/validation/saveQuestions";
 import { QuestionType } from "./useCreateTask";
 
-export const useSaveQuestions = async (questions: QuestionType[]) => {
+export const saveQuestions = async (questions: QuestionType[]) => {
   try {
     for (const question of questions) {
       const baseQuestion = {
         id: question.id,
         title: question.title,
         label: question.label,
-        description: question.description || "",
+        description: question.description ?? "",
         required: question.required ?? true,
         version: question.version,
         orderIndex: question.orderIndex,
@@ -88,7 +88,7 @@ export const useSaveQuestions = async (questions: QuestionType[]) => {
           break;
 
         default:
-          console.warn(`Oops! Unknown question type ${question}.`);
+          console.warn(`Oops! Unknown question type`);
           continue;
       }
     console.log("all i'm getting from questions", {...baseQuestion,metadata} );

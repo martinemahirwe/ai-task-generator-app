@@ -26,6 +26,7 @@ const QuestionForm = () => {
     label
   } = useCreateTask();
   
+
   return (
     <div className="quiz-form-container">
       <ToastContainer />
@@ -123,13 +124,13 @@ const QuestionForm = () => {
                 <p className="text-gray-800 mt-2">
                   <strong>Expected Response:</strong>
                   <span className="block text-green-700">
-                    {grade.expectedAnswers}
+                    {grade.expectedAnswers.join('\n')}
                   </span>
                 </p>
                 <p className="text-gray-800 mt-2">
                   <strong>Your Response:</strong>
                   <span className="block text-blue-700">
-                    {grade.userAnswers}
+                    {grade.userAnswers.join('\n')}
                   </span>
                 </p>
                 <p

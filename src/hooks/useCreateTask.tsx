@@ -15,6 +15,7 @@ import RangeQuestion from "~/app/components/questions/RangeQuestion";
 import TextQuestion from "~/app/components/questions/TextQuestion";
 import UrlQuestion from "~/app/components/questions/UrlQuestion";
 import { toast } from "react-toastify";
+import { gradeChoiceQuestions, gradeTask } from "~/app/actions/grading ";
 
 const QUESTION_TYPES = [
   { id: "TEXT", label: "text", icon: "📝" },
@@ -36,7 +37,7 @@ const Difficulty = [
   { id: 'DIFFICULT', label: 'difficult', color: 'bg-red-500' },
 ];
 
-type GradingRes = {
+export type GradingRes = {
   questionId: string;
   userAnswers: string[];
   expectedAnswers: string[];
@@ -180,29 +181,70 @@ export const useCreateTask = ()=>{
       };
       const onGrading = async () => {
         try {
+         let choiceGradingResults: GradingRes = [];
+         let taskGradingResults: GradingRes = [];
           const unansweredQuestions = questions.some(
             (question) => !answer[question.id]
           );
       
           if (unansweredQuestions) {
-            toast.error("You have to complete all questions before submiting results!");
+            toast.error("You have to complete all questions before submitting results!");
             return;
           }
       
           setLoader(true);
-          const response = await gradePathTask(questions, answer);
-          if (response.data) {
-            const newGrades = response.data.map((resp) => resp.grading);
+    
+          const multipleChoiceQuestions = questions.filter(
+            (question) =>
+              question.type === 'MULTIPLE_CHOICE' ||
+              question.type === 'DROP_DOWN' ||
+              question.type === 'CHECKBOXES'
+          );
+      
+          const otherQuestions = questions.filter(
+            (question) =>
+              question.type === 'TEXT' ||
+              question.type === 'PARAGRAPH' ||
+              question.type === 'CODE' ||
+              question.type === 'LINEAR_SCALE' ||
+              question.type === 'RANGE' ||
+              question.type === 'DATE' ||
+              question.type === 'ATTACHMENT' ||
+              question.type === 'URL'
+          );
+
+          if(multipleChoiceQuestions.length > 0){
+            
+            choiceGradingResults = await gradeChoiceQuestions(multipleChoiceQuestions, answer) as GradingRes;
+          }
+          if(otherQuestions.length > 0){
+
+            taskGradingResults = await gradeTask(otherQuestions, answer) as GradingRes;
+          }
+    
+          const combinedResults = [
+            ...choiceGradingResults,
+            ...taskGradingResults.map((taskRes) => ({
+              questionId: taskRes.questionId,
+              grading: taskRes.grading,
+              userAnswers: taskRes.userAnswers,
+              expectedAnswers: taskRes.expectedAnswers,
+            }))
+          ];
+      
+          if (combinedResults) {
+            const newGrades = combinedResults.map((res) => res?.grading);
             setGrades((prev) => [...prev, ...newGrades]);
-            setGradingRes(response.data);
+            setGradingRes(combinedResults as GradingRes);
           }
         } catch (error) {
-          console.error("Error creating task:", error);
+          console.error("Error grading task:", error);
         } finally {
           setLoader(false);
         }
       };
-
+      
+    
       const setDifficulty = (label: string) => {
         setLabel(label);
       };
