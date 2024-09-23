@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { anthropic } from '@ai-sdk/anthropic';
 import { config } from "dotenv";
 import { QuestionSchema } from "~/utils/validation/schema.validation";
+import { useSaveQuestions } from "~/hooks/useSaveQuestions";
 
 config({ path: ".env.local" });
 
@@ -17,7 +18,7 @@ export async function createPathTask(topic: string, selectedType: string[],label
         2. If no types are selected, mix various question types to create a diverse set of questions.
         3. Each question must adhere to the following JSON schema:
            ${JSON.stringify(QuestionSchema)}
-           (Ensure each question has a unique UUID assigned to the 'id' field in the format: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').
+           (Ensure each question has a unique UUID assigned to the 'id' field in the format: 'xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx').
         4. Ensure that all generated UUIDs are unique for each question.
         5. The questions should be well-structured and meaningful, accurately reflecting the nature of the topic and selected types. 
            Provide correct details for fields such as "title," "label," "description," and "expectedAnswer."
@@ -34,7 +35,7 @@ export async function createPathTask(topic: string, selectedType: string[],label
       schema: QuestionSchema,
       output: "array",
     });
-    
+    await useSaveQuestions(task);
     return task;
   } catch (error) {
     console.error("Error while generating tasks:", error);
